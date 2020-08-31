@@ -9,10 +9,10 @@ db = SQLAlchemy()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    username= db.Column(db.String(40), nullable=False)
+    username= db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(120), unique=False, nullable=False)
+    password = db.Column(db.String(80), unique=False, nullable=False)
     social= db.relationship('Social', backref='user', lazy=True)
     
 
@@ -36,12 +36,12 @@ class User(db.Model):
     
 
 class Social(db.Model):
-    social_name=db.Column(db.String(20), nullable=False)
+    social_name=db.Column(db.String(20), nullable=False, unique=False)
     password= db.Column(db.String(80), nullable=False, unique=False)
     username = db.Column(db.String(80), nullable=False, unique=True)
     id=db.Column(db.Integer, primary_key=True)
     email= db.Column(db.String(80), nullable=False, unique=True)
-    photo= db.Column(db.String(80), nullable=True)
+    photo= db.Column(db.String(80), nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     posts = relationship('Post',backref="social", lazy=True)
 
@@ -59,9 +59,9 @@ class Social(db.Model):
         }
 
 class Post(db.Model):
-    date=db.Column(db.Date, nullable=False)
+    date=db.Column(db.Date, nullable=False, unique=False)
     id= db.Column(db.Integer, primary_key=True, nullable=False)
-    description= db.Column(db.String(120), nullable=False)
+    description= db.Column(db.String(120), nullable=False, unique=False)
     multimedias= db.relationship('Multimedia', backref='post', lazy=True)
     id_social=db.Column(db.Integer, db.ForeignKey('social.id'))
     
@@ -78,7 +78,7 @@ class Post(db.Model):
         }
 class Multimedia(db.Model):
     id=db.Column(db.Integer,nullable=False, primary_key=True)
-    multimedia_url= db.Column(db.String(250),nullable=False)
+    multimedia_url= db.Column(db.String(250),nullable=False, unique=False)
    
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
     def __repr__(self):
