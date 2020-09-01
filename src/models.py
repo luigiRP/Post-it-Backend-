@@ -38,9 +38,9 @@ class User(db.Model):
 class Social(db.Model):
     social_name=db.Column(db.String(20), nullable=False, unique=False)
     password= db.Column(db.String(80), nullable=False, unique=False)
-    username = db.Column(db.String(80), nullable=False, unique=True)
+    username = db.Column(db.String(80), nullable=False, unique=False)
     id=db.Column(db.Integer, primary_key=True)
-    email= db.Column(db.String(80), nullable=False, unique=True)
+    email= db.Column(db.String(80), nullable=False, unique=False)
     photo= db.Column(db.String(80), nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     posts = relationship('Post',backref="social", lazy=True)
