@@ -22,27 +22,17 @@ class User(db.Model):
             "id": self.id,
             "username": self.username, 
             "email": self.email,
-            "name": self.name,
-            "social_id": self.social_id,
+            "name": self.name
         }
-    
-    # def get_users():
-    #     users = User.query.all()
-    #     users = list(map(lambda user: user.serialize(),users))
-    #     return users
 
-class SocialEnum(enum.Enum):
-    instagram = 'Instagram'
-    facebook = 'Facebook'
-    twitter = 'Twitter'
-    linkedin = 'LinkedIn'
+
 
 class Social(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=False)
     password = db.Column(db.String(80), nullable=False, unique=False)
     email = db.Column(db.String(320), nullable=False, unique=False)
-    social_name = db.Column(db.Enum(SocialEnum), nullable=False, unique=False)
+    social_name = db.Column(db.Enum("instagram","twitter","facebook","linkedin"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     posts = relationship('Post',backref="social", lazy=True)
@@ -78,13 +68,11 @@ class Post(db.Model):
             "description": self.description
         }
 
-class MultimediaEnum(enum.Enum):
-    img = 'Img'
-    video = 'Video'
+
     
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
-    multimedia_type = db.Column(db.Enum(MultimediaEnum), nullable=False)
+    multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
     multimedia_url = db.Column(db.Text,nullable=False, unique=False)
    
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
