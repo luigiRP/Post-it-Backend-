@@ -24,23 +24,23 @@ class User(db.Model):
             "id": self.id,
             "username": self.username, 
             "email": self.email,
-            "name": self.name,
-            "social_id": self.social_id,
+            "name": self.name
         }
     
-    def get_users():
-        users = User.query.all()
-        users = list(map(lambda user: user.serialize(),users))
-        return users
+    def get_user(new_id):
+        user= User.query.filter_by(id=new_id).first()
+        user = user.serialize()
+        
+        return user
 
     
 
 class Social(db.Model):
     social_name=db.Column(db.String(20), nullable=False, unique=False)
     password= db.Column(db.String(80), nullable=False, unique=False)
-    username = db.Column(db.String(80), nullable=False, unique=True)
+    username = db.Column(db.String(80), nullable=False, unique=False)
     id=db.Column(db.Integer, primary_key=True)
-    email= db.Column(db.String(80), nullable=False, unique=True)
+    email= db.Column(db.String(80), nullable=False, unique=False)
     photo= db.Column(db.String(80), nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     posts = relationship('Post',backref="social", lazy=True)
@@ -54,9 +54,17 @@ class Social(db.Model):
             "social_name": self.social_name,
             "username": self.username, 
             "email": self.email,
-            "photo": self.photo,
-            "post_id": self.post_id,
+            "photo": self.photo
         }
+    def get_all_socials(new_id):
+        socials = Social.query.filter_by(user_id=new_id)
+        all_socials = list(map(lambda x: x.serialize(), socials))
+        return all_socials
+    def get_social(new_user_id, new_id_social):
+        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+        social=social.serialize()
+        
+        return social
 
 class Post(db.Model):
     date=db.Column(db.Date, nullable=False, unique=False)
@@ -76,6 +84,12 @@ class Post(db.Model):
             "id_multimedia": self.id_multimedia,
             "description": self.description
         }
+    
+    def get_post(new_id_user,new_id_social,new_id_post):
+        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+        social=social.serialize()
+
+    
 class Multimedia(db.Model):
     id=db.Column(db.Integer,nullable=False, primary_key=True)
     multimedia_url= db.Column(db.String(250),nullable=False, unique=False)
