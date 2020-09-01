@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User,Social
+from models import db, User,Social,Post
 #from models import Person
 
 app = Flask(__name__)
@@ -40,6 +40,10 @@ def get_all_socials(id):
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['GET'])
 def get_social(id_user,id_social):
+    return jsonify(Social.get_social(id_user,id_social))
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
+def get_post(id_user,id_social,id_post):
     return jsonify(Social.get_social(id_user,id_social))
 
 # this only runs if `$ python src/main.py` is executed

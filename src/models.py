@@ -86,8 +86,9 @@ class Post(db.Model):
         }
     
     def get_post(new_id_user,new_id_social,new_id_post):
-        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+        social = Social.query.filter_by(id=new_id_post,id_social=new_id_social,Social.user_id=new_id_user).first()
         social=social.serialize()
+        return social
 
     
 class Multimedia(db.Model):
