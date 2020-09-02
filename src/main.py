@@ -32,19 +32,39 @@ def sitemap():
 
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
-    return User.get_user(id)
+    if User.get_user(id) is None:
+        raise APIException('User not found', status_code=404)
+    else:
+        return User.get_user(id)
 
 @app.route('/users/<int:id>/socials', methods=['GET'])
 def get_all_socials(id):
-    return jsonify(Social.get_all_socials(id))
+    if Social.get_all_socials(id) is None:
+        raise APIException('Social media accounts not found', status_code=404)
+    else:
+
+        return jsonify(Social.get_all_socials(id))
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['GET'])
 def get_social(id_user,id_social):
-    return jsonify(Social.get_social(id_user,id_social))
+    if Social.get_social(id_user,id_social) is None:
+        raise APIException('Social media account not found', status_code=404) 
+    else:
+        return jsonify(Social.get_social(id_user,id_social))
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
 def get_post(id_user,id_social,id_post):
-    return jsonify(Social.get_social(id_user,id_social))
+    if Post.get_post(id_user,id_social,id_post) is None:
+        raise APIException('Post not found', status_code=404) 
+    else:
+        return jsonify(Post.get_post(id_user,id_social,id_post))
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts', methods=['GET'])
+def get_all_post(id_user,id_social):
+    if Post.get_all_post(id_user,id_social) is None:
+        raise APIException('Posts not found', status_code=404)
+    else: 
+        return jsonify(Post.get_all_post(id_user,id_social))
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

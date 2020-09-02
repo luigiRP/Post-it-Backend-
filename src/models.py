@@ -26,10 +26,11 @@ class User(db.Model):
         }
     
     def get_user(new_id):
-        user= User.query.filter_by(id=new_id).first()
-        user = user.serialize()
-        
-        return user
+        user= User.query.filter_by(id=new_id).first()        
+        if user is None:
+            return None
+        else:       
+            return user.serialize()
 
     
  
@@ -65,14 +66,19 @@ class Social(db.Model):
     
     def get_all_socials(new_id):
         socials = Social.query.filter_by(user_id=new_id)
-        all_socials = list(map(lambda x: x.serialize(), socials))
-        return all_socials
+        socials=list(map(lambda x: x.serialize(), socials))
+        if len(socials) is 0:
+            return None
+        else:
+            return socials
+        
     
     def get_social(new_user_id, new_id_social):
         social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
-        social=social.serialize()
-        
-        return social
+        if social is None:
+            return None
+        else:
+            return social.serialize()
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -92,15 +98,27 @@ class Post(db.Model):
         }
     
     def get_post(new_id_user,new_id_social,new_id_post):
-        post = db.session.query().filter(User.id == Social.id).filter(Social.id == Post.id).filter(User.id==new_id_user, Social.id==new_id_social, Post.id==new_id_post).first()
+        social = Social.get_social(new_id_user,new_id_social)
+        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
+        if post is None:
+            return None
+        else:
+            return post.serialize()
+    
+    def get_all_post(new_id_user,new_id_social):
+        social= Social.get_social(new_id_user,new_id_social)
+        posts = Post.query.filter_by(id_social=new_id_social)
+        posts = list(map(lambda x: x.serialize(), posts))
+        if len(posts) is 0:
+            return None
+        else:
+            return posts
 
-class MultimediaEnum(enum.Enum):
-    img = 'Img'
-    video = 'Video'
+        
     
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
-    multimedia_type = db.Column(db.Enum(MultimediaEnum), nullable=False)
+    multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
     multimedia_url = db.Column(db.Text,nullable=False, unique=False)
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
     def __repr__(self):
