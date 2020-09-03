@@ -8,8 +8,9 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User,Social,Post
-#from models import Person
+from models import db, User, Social, Post, Multimedia
+
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -37,6 +38,7 @@ def get_user(id):
     else:
         return User.get_user(id)
 
+
 @app.route('/users/<int:id>', methods=['PUT','PATCH'])
 def update_user(id):
     body=request.get_json()
@@ -44,6 +46,17 @@ def update_user(id):
         raise APIException('User not found', status_code=404)
     else:
         return User.update_user(id,body)
+
+@app.route('/login', methods=['GET'])
+def get_user_by_email():
+    body=request.get_json()
+    if User.get_user_by_email(body["email"],body["password"]) is "email":
+        raise APIException("email doesn't exist", status_code=404)
+    elif User.get_user_by_email(body["email"],body["password"]) is "password":
+        raise APIException("password for that email doesn't exist", status_code=404)
+    else:
+        return User.get_user_by_email(body["email"],body["password"])
+
 
 @app.route('/users/<int:id>/socials', methods=['GET'])
 def get_all_socials(id):
@@ -81,6 +94,7 @@ def get_all_post(id_user,id_social):
     else: 
         return jsonify(Post.get_all_post(id_user,id_social))
 
+
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['PUT','PATCH'])
 def update_post(id_user,id_social,id_post):
     body=request.get_json()
@@ -88,6 +102,21 @@ def update_post(id_user,id_social,id_post):
         raise APIException('Post not found', status_code=404) 
     else:
         return jsonify(Post.update_post(id_user,id_social,id_post,body))
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias', methods=['GET'])
+def get_all_multimedia(id_user,id_social,id_post):
+    if Multimedia.get_all_multimedia(id_user,id_social,id_post) is None:
+        raise APIException('Multimedia not found', status_code=404)
+    else: 
+        return jsonify(Multimedia.get_all_multimedia(id_user,id_social,id_post))
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias/<int:id_multimedia>', methods=['GET'])
+def get_multimedia(id_user,id_social,id_post,id_multimedia):
+    if Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia) is None:
+        raise APIException('Multimedia not found', status_code=404)
+    else: 
+        return jsonify(Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia))
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
