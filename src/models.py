@@ -31,9 +31,19 @@ class User(db.Model):
             return None
         else:       
             return user.serialize()
-
     
- 
+    def get_user_by_email(new_email, new_password):
+        user = User.query.filter_by(email = new_email).first()
+        errors = ['email','password']
+        if user is None:
+            return errors[0]
+        elif new_password != user.password:
+            print(str(new_password) + " = " + str(user.password))
+            return errors[1]
+        else:
+            return user.serialize()
+
+
 
 class SocialEnum(enum.Enum):
     instagram = 'Instagram'
@@ -65,20 +75,28 @@ class Social(db.Model):
         }
     
     def get_all_socials(new_id):
-        socials = Social.query.filter_by(user_id=new_id)
-        socials=list(map(lambda x: x.serialize(), socials))
-        if len(socials) is 0:
-            return None
+        user = User.get_user(new_id)
+        if user is None:
+            return User.get_user(new_id)
         else:
-            return socials
+            socials = Social.query.filter_by(user_id=new_id)
+            socials=list(map(lambda x: x.serialize(), socials))
+            if len(socials) is 0:
+                return None
+            else:
+                return socials
         
     
     def get_social(new_user_id, new_id_social):
-        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
-        if social is None:
-            return None
+        user = User.get_user(new_user_id)
+        if user is None:
+            return User.get_user(new_user_id)
         else:
-            return social.serialize()
+            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+            if social is None:
+                return None
+            else:
+                return social.serialize()
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -99,28 +117,35 @@ class Post(db.Model):
     
     def get_post(new_id_user,new_id_social,new_id_post):
         social = Social.get_social(new_id_user,new_id_social)
-        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
-        if post is None:
+        user = User.get_user(new_id_user)
+        if user is None or social is None:
             return None
         else:
-            return post.serialize()
+            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
+            if post is None:
+                return None
+            else:
+                return post.serialize()
     
     def get_all_post(new_id_user,new_id_social):
-        social= Social.get_social(new_id_user,new_id_social)
-        posts = Post.query.filter_by(id_social=new_id_social)
-        posts = list(map(lambda x: x.serialize(), posts))
-        if len(posts) is 0:
+        social = Social.get_social(new_id_user,new_id_social)
+        user = User.get_user(new_id_user)
+        if user is None or social is None:
             return None
         else:
-            return posts
+            posts = Post.query.filter_by(id_social=new_id_social)
+            posts = list(map(lambda x: x.serialize(), posts))
+            if len(posts) is 0:
+                return None
+            else:
+                return posts
 
-        
-    
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
     multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
     multimedia_url = db.Column(db.Text,nullable=False, unique=False)
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
+
     def __repr__(self):
         return f"Multimedia {self.multimedia_type}"
 
@@ -131,8 +156,29 @@ class Multimedia(db.Model):
             "multimedia_url": self.multimedia_url      
         }
 
-
-
-
-
+    def get_all_multimedia(new_id_user,new_id_social,new_id_post):
+        post = Post.get_post(new_id_user,new_id_social,new_id_post)
+        social = Social.get_social(new_id_user,new_id_social)
+        user = User.get_user(new_id_user)
+        if user is None or social is None or post is None:
+            return None
+        else:
+            multimedias = Multimedia.query.filter_by(id_post=new_id_post)
+            multimedias = list(map(lambda x: x.serialize(), multimedias))
+            if len(multimedias) is 0:
+                return None
+            else:
+                return multimedias
     
+    def get_multimedia(new_id_user,new_id_social,new_id_post,new_id_multimedia):
+        post = Post.get_post(new_id_user,new_id_social,new_id_post)
+        social = Social.get_social(new_id_user,new_id_social)
+        user = User.get_user(new_id_user)
+        if user is None or social is None or post is None:
+            return None
+        else:
+            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia).first()
+            if multimedia is None:
+                return None
+            else:
+                return multimedia.serialize()
