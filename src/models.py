@@ -13,6 +13,7 @@ class User(db.Model):
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     social = db.relationship('Social', backref='user', lazy=True)
+    is_active = db.Column(db.Boolean, default=True)
     
     def __repr__(self):
         return f"User {self.username}"
@@ -75,6 +76,7 @@ class Social(db.Model):
     photo = db.Column(db.Text, nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     posts = relationship('Post',backref="social", lazy=True)
+    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"Social {self.username}"
@@ -139,6 +141,7 @@ class Post(db.Model):
     description = db.Column(db.Text, nullable=False, unique=False)
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
+    is_active = db.Column(db.Boolean, default=True)
         
     def __repr__(self):
         return f"Post {self.description}"
@@ -194,6 +197,7 @@ class Multimedia(db.Model):
     multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
     multimedia_url = db.Column(db.Text,nullable=False, unique=False)
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
+    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"Multimedia {self.multimedia_type}"
