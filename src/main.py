@@ -1,3 +1,4 @@
+ #flask
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
@@ -6,9 +7,10 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from utils import APIException, generate_sitemap
+from utils import APIException, generate_sitemap, validation_username, validation_email, validation_name, validation_password, validation_date
 from admin import setup_admin
-from models import db, User
+from models import db, User, Post
+import json
 #from models import Person
 
 app = Flask(__name__)
@@ -30,15 +32,32 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+@app.route('/user', methods=['POST'])
+def add_user():
+    data_user = request.get_json()
+    valid_username = validation_username(data_user)
+    valid_email = validation_email(data_user)
+    valid_name = validation_name(data_user)
+    valid_password = validation_password(data_user)
+    if valid_username == True and valid_email == True and valid_name == True and valid_password == True:
+        User.post_user(data_user)
+        return "Successful registration", 200
+    else:
+        return "Error"
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/post', methods=['POST'])
+def add_post():
+    posting_date_time = request.get_json()
+    valid_date = validation_date(posting_date_time)
+    if valid_date == True:
+        Post.posting(posting_date_time)
+        return "Successful registration", 200
+    else:
+        return "Error"
+    
 
-    return jsonify(response_body), 200
 
+    
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))

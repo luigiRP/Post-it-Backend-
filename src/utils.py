@@ -1,4 +1,6 @@
 from flask import jsonify, url_for
+from email.utils import parseaddr
+import datetime
 
 class APIException(Exception):
     status_code = 400
@@ -39,3 +41,32 @@ def generate_sitemap(app):
         <p>Start working on your proyect by following the <a href="https://github.com/4GeeksAcademy/flask-rest-hello/blob/master/docs/_QUICK_START.md" target="_blank">Quick Start</a></p>
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
+
+#El parametro data_user a utilizar puede tomar cualquier nombre, no es el mismo de Main, lo llamamos igual para
+
+def validation_username(data_user):
+    username = data_user.get("username")
+    #validando el largo de username y que username contenga solo letras y numeros
+    return len(username) > 6 and username.isalnum()
+
+def validation_email(data_user):
+    email = data_user.get("email")
+    lista_email = parseaddr(email)
+    #validando email
+    return lista_email[1] == email
+    
+def validation_name(data_user):
+    name = data_user.get("name")
+    #validando el largo de name, que contenga solo letras y no contenga espacios   
+    return len(name) > 0 and name.isalpha() and name.istitle() 
+    #and len(name.split()) > 0 o " " in name
+
+def validation_password(data_user):
+    password = data_user.get("password")
+    #validando que la contraseña sea de 8 o mas digitos, tenga mayusculas, minusculas y numeros
+    return len(password) > 7 and password.isalnum()
+
+def validation_date(posting_date_time):
+    date = posting_date_time.get("date")
+    #validando formato fecha y hora
+    return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M')
