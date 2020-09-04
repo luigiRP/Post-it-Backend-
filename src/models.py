@@ -12,7 +12,9 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
     social = db.relationship('Social', backref='user', lazy=True)
+   
     
     def __repr__(self):
         return f"User {self.username}"
@@ -26,14 +28,14 @@ class User(db.Model):
         }
     
     def get_user(new_id):
-        user= User.query.filter_by(id=new_id).first()        
+        user= User.query.filter_by(id=new_id,is_active=True).first()        
         if user is None:
             return None
         else:       
             return user.serialize()
     
     def get_user_by_email(new_email, new_password):
-        user = User.query.filter_by(email = new_email).first()
+        user = User.query.filter_by(email = new_email,is_active=True).first()
         errors = ['email','password']
         if user is None:
             return errors[0]
@@ -59,7 +61,9 @@ class Social(db.Model):
     social_name = db.Column(db.Enum("instagram","facebook","twitter","google"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    is_active = db.Column(db.Boolean, default=True)
     posts = relationship('Post',backref="social", lazy=True)
+    
 
     def __repr__(self):
         return f"Social {self.username}"
@@ -79,7 +83,7 @@ class Social(db.Model):
         if user is None:
             return User.get_user(new_id)
         else:
-            socials = Social.query.filter_by(user_id=new_id)
+            socials = Social.query.filter_by(user_id=new_id, is_active=True)
             socials=list(map(lambda x: x.serialize(), socials))
             if len(socials) is 0:
                 return None
@@ -92,7 +96,7 @@ class Social(db.Model):
         if user is None:
             return User.get_user(new_user_id)
         else:
-            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social,is_active=True).first()
             if social is None:
                 return None
             else:
@@ -104,6 +108,7 @@ class Post(db.Model):
     description = db.Column(db.Text, nullable=False, unique=False)
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
+    is_active = db.Column(db.Boolean, default=True)
         
     def __repr__(self):
         return f"Post {self.description}"
@@ -121,7 +126,7 @@ class Post(db.Model):
         if user is None or social is None:
             return None
         else:
-            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
+            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post,is_active=True).first()
             if post is None:
                 return None
             else:
@@ -133,7 +138,7 @@ class Post(db.Model):
         if user is None or social is None:
             return None
         else:
-            posts = Post.query.filter_by(id_social=new_id_social)
+            posts = Post.query.filter_by(id_social=new_id_social,is_active=True).first()
             posts = list(map(lambda x: x.serialize(), posts))
             if len(posts) is 0:
                 return None
@@ -145,6 +150,7 @@ class Multimedia(db.Model):
     multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
     multimedia_url = db.Column(db.Text,nullable=False, unique=False)
     id_post= db.Column(db.Integer, db.ForeignKey('post.id'))
+    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"Multimedia {self.multimedia_type}"
@@ -163,7 +169,7 @@ class Multimedia(db.Model):
         if user is None or social is None or post is None:
             return None
         else:
-            multimedias = Multimedia.query.filter_by(id_post=new_id_post)
+            multimedias = Multimedia.query.filter_by(id_post=new_id_post,is_active=True)
             multimedias = list(map(lambda x: x.serialize(), multimedias))
             if len(multimedias) is 0:
                 return None
@@ -177,7 +183,7 @@ class Multimedia(db.Model):
         if user is None or social is None or post is None:
             return None
         else:
-            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia).first()
+            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia,is_active=True).first()
             if multimedia is None:
                 return None
             else:
