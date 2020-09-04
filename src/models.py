@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import PasswordType
 import enum
 
 db = SQLAlchemy()
@@ -9,7 +10,11 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(40), nullable=False, unique=True)
-    password = db.Column(db.String(80), unique=False, nullable=False)
+    password = db.Column(
+        PasswordType(schemes=['pbkdf2_sha512']),
+        unique=False,
+        nullable=False,
+    )
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     social = db.relationship('Social', backref='user', lazy=True)
@@ -70,7 +75,11 @@ class SocialEnum(enum.Enum):
 class Social(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=False)
-    password = db.Column(db.String(80), nullable=False, unique=False)
+    password = db.Column(
+        PasswordType(schemes=['pbkdf2_sha512']),
+        unique=False,
+        nullable=False,
+    )
     email = db.Column(db.String(320), nullable=False, unique=False)
     social_name = db.Column(db.Enum("instagram","facebook","twitter","google"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
