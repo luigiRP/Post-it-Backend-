@@ -25,13 +25,22 @@ class User(db.Model):
             "email": self.email,
             "name": self.name
         }
-    
+
     def get_user(new_id):
         user= User.query.filter_by(id=new_id).first()        
         if user is None:
             return None
         else:       
             return user.serialize()
+    
+    def delete_user(new_id):
+    user = User.query.filter_by(id=new_id).first() 
+    if user is None:
+        return None
+    else:
+        user.is_active = False
+        db.session.commit()
+        return user.serialize()
     
     def update_user(new_id,body):
      

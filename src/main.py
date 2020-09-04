@@ -47,6 +47,13 @@ def update_user(id):
     else:
         return User.update_user(id,body)
 
+@app.route('/users/<int:id>', methods=['DELETE'])
+def delete_user(id):
+    if User.delete_user(id) is None:
+        raise APIException('User not found', status_code=404)
+    else:
+        return User.delete_user(id)
+
 @app.route('/login', methods=['GET'])
 def get_user_by_email():
     body=request.get_json()
