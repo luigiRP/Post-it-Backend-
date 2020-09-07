@@ -49,7 +49,7 @@ def update_user(id):
 
 @app.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
-    if User.delete_user(id) is None:
+    if User.get_user(id) is None:
         raise APIException('User not found', status_code=404)
     else:
         return User.delete_user(id)

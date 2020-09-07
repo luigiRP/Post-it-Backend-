@@ -27,24 +27,24 @@ class User(db.Model):
         }
 
     def get_user(new_id):
-        user= User.query.filter_by(id=new_id).first()        
+        user= User.query.filter_by(id=new_id, is_active=True).first()        
         if user is None:
             return None
         else:       
             return user.serialize()
     
     def delete_user(new_id):
-    user = User.query.filter_by(id=new_id).first() 
-    if user is None:
-        return None
-    else:
-        user.is_active = False
-        db.session.commit()
-        return user.serialize()
+        user = User.query.filter_by(id=new_id, is_active=True).first() 
+        if user is None:
+            return None
+        else:
+            user.is_active = False
+            db.session.commit()
+            return "User deleted"
     
     def update_user(new_id,body):
      
-        user= User.query.filter_by(id=new_id).first() 
+        user= User.query.filter_by(id=new_id, is_active=True).first() 
         if user is None:
             return None
         else:
@@ -60,7 +60,7 @@ class User(db.Model):
             return "user with id: " + str(user.id) + " updated"
         
     def get_user_by_email(new_email, new_password):
-        user = User.query.filter_by(email = new_email).first()
+        user = User.query.filter_by(email = new_email, is_active=True).first()
         errors = ['email','password']
         if user is None:
             return errors[0]
@@ -105,7 +105,7 @@ class Social(db.Model):
         if user is None:
             return User.get_user(new_id)
         else:
-            socials = Social.query.filter_by(user_id=new_id)
+            socials = Social.query.filter_by(user_id=new_id, is_active=True)
             socials=list(map(lambda x: x.serialize(), socials))
             if len(socials) is 0:
                 return None
@@ -118,7 +118,7 @@ class Social(db.Model):
         if user is None:
             return User.get_user(new_user_id)
         else:
-            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
             if social is None:
                 return None
             else:
@@ -129,7 +129,7 @@ class Social(db.Model):
         if user is None:
             return User.get_user(new_user_id)
         else:
-          social = Social.query.filter_by(user_id=new_user_id,id=new_id_social).first()
+          social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
           if social is None:
               return None
           else:
@@ -168,7 +168,7 @@ class Post(db.Model):
         if user is None or social is None:
             return None
         else:
-            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
+            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
             if post is None:
                 return None
             else:
@@ -180,7 +180,7 @@ class Post(db.Model):
         if user is None or social is None:
             return None
         else:
-            posts = Post.query.filter_by(id_social=new_id_social)
+            posts = Post.query.filter_by(id_social=new_id_social, is_active=True)
             posts = list(map(lambda x: x.serialize(), posts))
             if len(posts) is 0:
                 return None
@@ -190,7 +190,7 @@ class Post(db.Model):
     
     def update_post(new_id_user,new_id_social,new_id_post,body):
         social= Social.get_social(new_id_user,new_id_social)
-        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post).first()
+        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
         if post is None or social is None:
             return None
         else:
@@ -225,7 +225,7 @@ class Multimedia(db.Model):
         if user is None or social is None or post is None:
             return None
         else:
-            multimedias = Multimedia.query.filter_by(id_post=new_id_post)
+            multimedias = Multimedia.query.filter_by(id_post=new_id_post, is_active=True)
             multimedias = list(map(lambda x: x.serialize(), multimedias))
             if len(multimedias) is 0:
                 return None
@@ -239,7 +239,7 @@ class Multimedia(db.Model):
         if user is None or social is None or post is None:
             return None
         else:
-            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia).first()
+            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()
             if multimedia is None:
                 return None
             else:
