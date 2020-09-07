@@ -87,6 +87,13 @@ def update_social(id_user,id_social):
     else:
         return jsonify(Social.update_social(id_user,id_social,body))
 
+@app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['DELETE'])
+def delete_social(id_user,id_social):
+    if Social.get_social(id_user,id_social) is None:
+        raise APIException('Social not found', status_code=404)
+    else:
+        return Social.delete_social(id_user,id_social)
+
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
 def get_post(id_user,id_social,id_post):
     if Post.get_post(id_user,id_social,id_post) is None:
@@ -110,6 +117,13 @@ def update_post(id_user,id_social,id_post):
     else:
         return jsonify(Post.update_post(id_user,id_social,id_post,body))
 
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['DELETE'])
+def delete_post(id_user,id_social,id_post):
+    if Post.get_post(id_user,id_social,id_post) is None:
+        raise APIException('Post not found', status_code=404)
+    else:
+        return Post.delete_post(id_user,id_social,id_post)
+
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias', methods=['GET'])
 def get_all_multimedia(id_user,id_social,id_post):
     if Multimedia.get_all_multimedia(id_user,id_social,id_post) is None:
@@ -123,6 +137,13 @@ def get_multimedia(id_user,id_social,id_post,id_multimedia):
         raise APIException('Multimedia not found', status_code=404)
     else: 
         return jsonify(Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia))
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias/<int:id_multimedia>', methods=['DELETE'])
+def delete_multimedia(id_user,id_social,id_post,id_multimedia):
+    if Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia) is None:
+        raise APIException('Multimedia not found', status_code=404)
+    else:
+        return Multimedia.delete_multimedia(id_user,id_social,id_post,id_multimedia)
 
 
 # this only runs if `$ python src/main.py` is executed
