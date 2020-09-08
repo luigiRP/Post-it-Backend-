@@ -2,14 +2,15 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, make_response
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Social, Post, Multimedia
-
+from flask_jwt import JWT, jwt_required, current_identity
+import datetime
 
 
 app = Flask(__name__)
@@ -20,6 +21,8 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+app.config['SECRET_KEY'] = 'thisissecretkey'
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -56,13 +59,21 @@ def delete_user(id):
 
 @app.route('/login', methods=['GET'])
 def get_user_by_email():
-    body=request.get_json()
-    if User.get_user_by_email(body["email"],body["password"]) is "email":
-        raise APIException("email doesn't exist", status_code=404)
-    elif User.get_user_by_email(body["email"],body["password"]) is "password":
-        raise APIException("password for that email doesn't exist", status_code=404)
-    else:
-        return User.get_user_by_email(body["email"],body["password"])
+    auth = request.authorization
+
+    if auth and auth.password == "password":
+        token = jwt.encode({'user': auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        print(token.decode('UTF-8'))
+        return jsonify({'token' : token.decode('UTF-8')})
+    return make_response('Could not verify!',401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
+
+    # body=request.get_json()
+    # if User.get_user_by_email(body["email"],body["password"]) is "email":
+    #     raise APIException("email doesn't exist", status_code=404)
+    # elif User.get_user_by_email(body["email"],body["password"]) is "password":
+    #     raise APIException("password for that email doesn't exist", status_code=404)
+    # else:
+    #     return User.get_user_by_email(body["email"],body["password"])
 
 
 @app.route('/users/<int:id>/socials', methods=['GET'])
