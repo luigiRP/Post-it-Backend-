@@ -1,6 +1,6 @@
 from flask import jsonify, url_for
 from email.utils import parseaddr
-import datetime
+from datetime import datetime
 
 class APIException(Exception):
     status_code = 400
@@ -66,7 +66,19 @@ def validation_password(data_user):
     #validando que la contraseña sea de 8 o mas digitos, tenga mayusculas, minusculas y numeros
     return len(password) > 7 and password.isalnum()
 
-def validation_date(posting_date_time):
-    date = posting_date_time.get("date")
+def validation_date(posting):
+    date = posting.get("date")
     #validando formato fecha y hora
-    return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M')
+    try:
+        valid_datetime = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        return True
+    except:
+        return False
+
+def validation_description(posting):
+    description = posting.get("description")
+    #validando el formato de texto de la descripcion
+    return len(description) >= 0
+
+
+

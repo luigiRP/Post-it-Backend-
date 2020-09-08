@@ -61,6 +61,13 @@ class Social(db.Model):
             "photo": self.photo,
             "post_id": self.post_id,
         }
+    
+    @classmethod
+    def post_social(cls, data_social):
+        new_social = cls(social_name=data_social["social_name"], username=data_social["username"], email=data_social["email"], password=data_social["password"], photo=data_social["photo"])
+        db.session.add(new_social)
+        db.session.commit()
+        return new_social
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -81,8 +88,8 @@ class Post(db.Model):
         }
 
     @classmethod
-    def posting(cls, posting_date_time):
-        new_post = cls(date=posting_date_time["date"], description=posting_date_time["description"])
+    def post_posts(cls, posting):
+        new_post = cls(date = posting["date"], description = posting["description"])
         db.session.add(new_post)
         db.session.commit()
         return new_post
@@ -106,3 +113,10 @@ class Multimedia(db.Model):
             "multimedia_type": self.multimedia_type,
             "multimedia_url": self.multimedia_url      
         }
+    
+    @classmethod
+    def post_multimedia(cls, data_multimedia):
+        new_multimedia = cls(multimedia_type=data_multimedia["multimedia_type"], multimedia_url=data_multimedia["multimedia_url"])
+        db.session.add(new_multimedia)
+        db.session.commit()
+        return new_multimedia
