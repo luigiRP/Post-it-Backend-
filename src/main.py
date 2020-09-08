@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, url_for
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
-from utils import APIException, generate_sitemap, validation_username, validation_email, validation_name, validation_password, validation_date, validation_description
+from utils import APIException, generate_sitemap, validation_username, validation_email, validation_name, validation_password, validation_date
 from admin import setup_admin
 from models import db, User, Post, Social, Multimedia
 import json
@@ -55,8 +55,7 @@ def add_social():
 def add_post():
     posting = request.get_json()
     valid_date = validation_date(posting)
-    valid_description = validation_description(posting)
-    if valid_date == True and valid_description == True:
+    if valid_date == True:
         Post.post_posts(posting)
         return "Successful registration", 200
     else:

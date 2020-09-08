@@ -64,7 +64,7 @@ def validation_name(data_user):
 def validation_password(data_user):
     password = data_user.get("password")
     #validando que la contraseña sea de 8 o mas digitos, tenga mayusculas, minusculas y numeros
-    return len(password) > 7 and password.isalnum()
+    return len(password) > 7
 
 def validation_date(posting):
     date = posting.get("date")
@@ -74,11 +74,3 @@ def validation_date(posting):
         return True
     except:
         return False
-
-def validation_description(posting):
-    description = posting.get("description")
-    #validando el formato de texto de la descripcion
-    return len(description) >= 0
-
-
-
