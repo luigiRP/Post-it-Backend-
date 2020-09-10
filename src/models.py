@@ -2,10 +2,12 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import PasswordType
+from sqlalchemy_utils import PasswordType, force_auto_coercion
 import enum
 
+
 db = SQLAlchemy()
+force_auto_coercion()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -33,6 +35,13 @@ class User(db.Model):
         db.session.add(new_user)
         db.session.commit()
         return new_user
+    
+    def get_user(new_id):
+        user = User.query.filter_by(id = new_id).first()        
+        if user is None:
+            return None
+        else:       
+            return user.serialize()
 
 class Social(db.Model):
     id = db.Column(db.Integer, primary_key=True)

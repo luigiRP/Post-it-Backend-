@@ -45,6 +45,13 @@ def add_user():
     else:
         return "Error", 303
 
+@app.route('/users/<int:id>', methods=['GET'])
+def get_user_id(id):
+    if User.get_user(id) is None:
+        raise APIException('User not found', status_code=404)
+    else:
+        return User.get_user(id)
+
 @app.route('/socials', methods=['POST'])
 def add_social():
     data_social = request.get_json()
