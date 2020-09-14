@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import PasswordType
 import enum
 
 db = SQLAlchemy()
@@ -181,7 +180,7 @@ class Post(db.Model):
     def update_post(new_id_user,new_id_social,new_id_post,body):
         social= Social.get_social(new_id_user,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
-        if post is None or social is None:
+        if not post or not social:
             return None
         else:
             if "date" in body:
@@ -189,7 +188,7 @@ class Post(db.Model):
             if "description" in body:
                 post.description = body["description"]
             db.session.commit()
-            return "post account with id: " + str(post.id) + " updated"
+            return post
     
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
@@ -226,11 +225,11 @@ class Multimedia(db.Model):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
-        if user is None or social is None or post is None:
+        if not user or not social or not post:
             return None
         else:
             multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()
-            if multimedia is None:
+            if not multimedia:
                 return None
             else:
                 return multimedia.serialize()
