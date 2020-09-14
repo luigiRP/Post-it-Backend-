@@ -35,21 +35,19 @@ class User(db.Model):
             return user.serialize()
     
     def update_user(new_id,body):
-     
         user= User.query.filter_by(id=new_id, is_active=True).first() 
-        if user is None:
+        if not user:
             return None
-        else:
-            if "username" in body:
-                user.username = body["username"]
-            if "email" in body:
-                user.email = body["email"]
-            if "name" in body:
-                user.name = body["name"]
-            if "password" in body:
-                user.password = body["password"]
-            db.session.commit()
-            return "user with id: " + str(user.id) + " updated"
+        if "username" in body:
+            user.username = body["username"]
+        if "email" in body:
+            user.email = body["email"]
+        if "name" in body:
+            user.name = body["name"]
+        if "password" in body:
+            user.password = body["password"]
+        db.session.commit()
+        return user
         
     def get_user_by_email(new_email, new_password):
         user = User.query.filter_by(email = new_email, is_active=True).first()
@@ -94,7 +92,7 @@ class Social(db.Model):
     
     def get_all_socials(new_id):
         user = User.get_user(new_id)
-        if user is None:
+        if not user:
             return User.get_user(new_id)
         else:
             socials = Social.query.filter_by(user_id=new_id, is_active=True)
@@ -118,11 +116,11 @@ class Social(db.Model):
     
     def update_social(new_user_id, new_id_social):
         user = User.get_user(new_user_id)
-        if user is None:
+        if not user:
             return User.get_user(new_user_id)
         else:
           social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
-          if social is None:
+          if not social:
               return None
           else:
               if "social_name" in body:
@@ -134,7 +132,7 @@ class Social(db.Model):
               if "password" in body:
                   social.password = body["password"]
               db.session.commit()
-              return "social media account with id: " + str(social.id) + " updated"
+              return social
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
