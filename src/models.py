@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import PasswordType
 import enum
 
 db = SQLAlchemy()
@@ -10,9 +9,7 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(40), nullable=False, unique=True)
-    password = db.Column(PasswordType(schemes=['pbkdf2_sha512']),
-        unique=False,
-        nullable=False,)
+    password = db.Column(db.String(250), unique=False, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
@@ -31,21 +28,16 @@ class User(db.Model):
     
     def get_user(new_id):
         user= User.query.filter_by(id=new_id,is_active=True).first()        
-        if user is None:
+        if not user:
             return None
         else:       
             return user.serialize()
     
     def get_user_by_email(new_email, new_password):
-        user = User.query.filter_by(email = new_email,is_active=True).first()
-        errors = ['email','password']
-        if user is None:
-            return errors[0]
-        elif new_password != user.password:
-            print(str(new_password) + " = " + str(user.password))
-            return errors[1]
-        else:
-            return user.serialize()
+        user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
+        if not user:
+            return None
+        return user.serialize()
 
 
 
@@ -58,9 +50,7 @@ class SocialEnum(enum.Enum):
 class Social(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=False)
-    password = db.Column(PasswordType(schemes=['pbkdf2_sha512']),
-        unique=False,
-        nullable=False,)
+    password = db.Column(db.String(250), unique=False, nullable=False)
     email = db.Column(db.String(320), nullable=False, unique=False)
     social_name = db.Column(db.Enum("instagram","facebook","twitter","google"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
@@ -84,7 +74,7 @@ class Social(db.Model):
     
     def get_all_socials(new_id):
         user = User.get_user(new_id)
-        if user is None:
+        if not user:
             return User.get_user(new_id)
         else:
             socials = Social.query.filter_by(user_id=new_id, is_active=True)
@@ -97,11 +87,11 @@ class Social(db.Model):
     
     def get_social(new_user_id, new_id_social):
         user = User.get_user(new_user_id)
-        if user is None:
+        if not user:
             return User.get_user(new_user_id)
         else:
             social = Social.query.filter_by(user_id=new_user_id,id=new_id_social,is_active=True).first()
-            if social is None:
+            if not social:
                 return None
             else:
                 return social.serialize()
@@ -127,11 +117,11 @@ class Post(db.Model):
     def get_post(new_id_user,new_id_social,new_id_post):
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
-        if user is None or social is None:
+        if not user or not social:
             return None
         else:
             post = Post.query.filter_by(id_social=new_id_social,id=new_id_post,is_active=True).first()
-            if post is None:
+            if not post:
                 return None
             else:
                 return post.serialize()
@@ -139,7 +129,7 @@ class Post(db.Model):
     def get_all_post(new_id_user,new_id_social):
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
-        if user is None or social is None:
+        if not user or not social:
             return None
         else:
             posts = Post.query.filter_by(id_social=new_id_social,is_active=True).first()
@@ -170,7 +160,7 @@ class Multimedia(db.Model):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
-        if user is None or social is None or post is None:
+        if not user or not social or not post:
             return None
         else:
             multimedias = Multimedia.query.filter_by(id_post=new_id_post,is_active=True)
@@ -184,11 +174,11 @@ class Multimedia(db.Model):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
-        if user is None or social is None or post is None:
+        if not user or not social or not post:
             return None
         else:
             multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia,is_active=True).first()
-            if multimedia is None:
+            if not multimedia:
                 return None
             else:
                 return multimedia.serialize()
