@@ -16,6 +16,7 @@ from flask_jwt_extended import (
 from functools import wraps
 import jwt
 import datetime
+import tweepy
 
 
 app = Flask(__name__)
