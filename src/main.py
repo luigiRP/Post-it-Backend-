@@ -36,7 +36,7 @@ def get_user(id):
     user = User.get_user(id)
     if not user:
         raise APIException('User not found', status_code=404)
-    return user
+    return jsonify(user)
 
 @app.route('/login', methods=['GET'])
 def get_user_by_email():
@@ -45,7 +45,7 @@ def get_user_by_email():
     user = User.get_user_by_email(body["email"],body["password"])
     if not user:
         raise APIException("Login failed", status_code=401)
-    return user
+    return jsonify(user)
 
 @app.route('/users/<int:id>/socials', methods=['GET'])
 def get_all_socials(id):
