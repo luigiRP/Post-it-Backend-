@@ -20,6 +20,9 @@ mysqlclient = "*"
 flask-admin = "*"
 sqlalchemy-utils = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
+requests = "*"
+flask-login = "*"
+oauthlib = "*"
 
 [requires]
 python_version = "3.7"

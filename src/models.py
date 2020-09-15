@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from flask_login import UserMixin
 import enum
 import bcrypt
 
@@ -9,7 +10,7 @@ import bcrypt
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(40), nullable=False, unique=True)
     password = db.Column(db.String(250), unique=False, nullable=False)
