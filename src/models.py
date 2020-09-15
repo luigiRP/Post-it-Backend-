@@ -12,8 +12,8 @@ db = SQLAlchemy()
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    username = db.Column(db.String(40), nullable=False, unique=True)
-    password = db.Column(db.String(250), unique=False, nullable=False)
+    username = db.Column(db.String(40), nullable=True, unique=True)
+    password = db.Column(db.String(250), unique=False, nullable=True)
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     social = db.relationship('Social', backref='user', lazy=True)

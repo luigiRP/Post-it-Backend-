@@ -1,7 +1,3 @@
- #flask
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
 import os
 import requests
 from flask import Flask, redirect, request, jsonify, url_for
@@ -20,7 +16,6 @@ from admin import setup_admin
 from models import db, User, Post, Social, Multimedia
 import json
 import bcrypt
-#from models import Person
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
@@ -78,10 +73,6 @@ def login():
         return f"Welcome back {username}"
     else:
         return "Wrong password"
-    
-
-
-
 
 @app.route('/profile', methods=['POST'])
 def profile():
@@ -98,7 +89,6 @@ def profile():
         return f"Welcome back {username}"
     else:
         return "Wrong password"
-
 
 @app.route('/users', methods=['POST'])
 def add_user():
@@ -155,9 +145,6 @@ def add_multimedia():
     Multimedia.post_multimedia(data_multimedia)
     return "Successful registration", 200
     
-
-
-
 @app.route("/login")
 def loginOAuth():
     #return request.base_url, 200
@@ -173,7 +160,6 @@ def loginOAuth():
         scope=["openid", "email", "profile"],
     )
     return redirect(request_uri)
-
 
 @app.route("/login/callback")
 def callback():
@@ -223,18 +209,20 @@ def callback():
     # Create a user in your db with the information provided
     # by Google
     user = User(
-        id=unique_id, name=users_name, email=users_email, profile_pic=picture)
+        name=users_name, email=users_email, username=users_email)
 
     # Doesn't exist? Add it to the database.
-    if not User.get(unique_id):
-        User.create(unique_id, users_name, users_email, picture)
+    # AL HACER MERGE CON LOS GET'S DE LUIGI, ESTO CAMBIARA y SERA UNA LLAMADA AL GET USER BY EMAIL 
+    if not User.query.filter_by(email=users_email).first():
+        #User.create(unique_id, users_name, users_email)
+        db.session.add(user)
+        db.session.commit()
 
     # Begin user session by logging the user in
     login_user(user)
 
     # Send user back to homepage
     return redirect(url_for("sitemap").replace('http://', 'https://'))
-
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
