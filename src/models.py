@@ -9,12 +9,17 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(40), nullable=False, unique=True)
+
     password = db.Column(db.String(250), unique=False, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     social = db.relationship('Social', backref='user', lazy=True)
-   
+    email = db.Column(db.String(320), unique=True, nullable=False)
+    name = db.Column(db.String(120), unique=False, nullable=False)
+    social = db.relationship('Social', backref='user', lazy=True)
+    is_active = db.Column(db.Boolean, default=True)
+    
     def __repr__(self):
         return f"User {self.username}"
 
@@ -25,6 +30,7 @@ class User(db.Model):
             "email": self.email,
             "name": self.name
         }
+
     
     def get_user(new_id):
         user= User.query.filter_by(id=new_id,is_active=True).first()        
@@ -40,7 +46,6 @@ class User(db.Model):
         return user.serialize()
 
 
-
 class SocialEnum(enum.Enum):
     instagram = 'Instagram'
     facebook = 'Facebook'
@@ -52,12 +57,11 @@ class Social(db.Model):
     username = db.Column(db.String(80), nullable=False, unique=False)
     password = db.Column(db.String(250), unique=False, nullable=False)
     email = db.Column(db.String(320), nullable=False, unique=False)
-    social_name = db.Column(db.Enum("instagram","facebook","twitter","google"), nullable=False, unique=False)
+    social_name = db.Column(db.Enum("instagram","twitter","facebook","linkedin"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     is_active = db.Column(db.Boolean, default=True)
     posts = relationship('Post',backref="social", lazy=True)
-    
 
     def __repr__(self):
         return f"Social {self.username}"
@@ -71,6 +75,7 @@ class Social(db.Model):
             "photo": self.photo,
             "user_id": self.user_id,
         }
+
     
     def get_all_socials(new_id):
         user = User.get_user(new_id)
@@ -113,6 +118,7 @@ class Post(db.Model):
             "date": self.date,
             "id_social": self.id_social
         }
+
     
     def get_post(new_id_user,new_id_social,new_id_post):
         social = Social.get_social(new_id_user,new_id_social)
@@ -182,3 +188,4 @@ class Multimedia(db.Model):
                 return None
             else:
                 return multimedia.serialize()
+
