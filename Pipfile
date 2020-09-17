@@ -20,6 +20,7 @@ mysqlclient = "*"
 flask-admin = "*"
 flask-jwt-extended = "*"
 tweepy = "*"
+flask-dance = {extras = ["sqla"], version = "*"}
 
 [requires]
 python_version = "3.7"

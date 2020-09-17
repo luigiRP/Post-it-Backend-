@@ -14,6 +14,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from functools import wraps
+from flask_dance.contrib.twitter import make_twitter_blueprint
 import jwt
 import datetime
 import tweepy
@@ -75,6 +76,16 @@ def get_user_by_email():
     else:
         access_token = create_access_token(identity=user["username"])
     return jsonify(access_token=access_token), 200
+
+@app.route('/login/twitter')
+def login_twitter():
+    auth = tweepy.OAuthHandler("esgGNTBknGOAMhAvLavomaJns", "NJJLNbrGD9D34hINeM0UXUMMTIoM27hysMlQlzjZz5NKJE12Jr")
+    auth.set_access_token("1897674564-szBywg2OSk956YdSQXUE8aetAn9Jddnr46RmMhx", "9kNgDpjN6La4qzdybt9KL2jzir1YOVwzSoYKrgwPmZFrS")
+    try:
+        api.verify_credentials()
+        return "Authentication OK"
+    except:
+        return "Error during authentication"
 
 
 @app.route('/users/<int:id>', methods=['GET'])
