@@ -17,10 +17,6 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(120), unique=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     social = db.relationship('Social', backref='user', lazy=True)
-    email = db.Column(db.String(320), unique=True, nullable=False)
-    name = db.Column(db.String(120), unique=False, nullable=False)
-    social = db.relationship('Social', backref='user', lazy=True)
-    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"User {self.username}"
@@ -32,7 +28,7 @@ class User(db.Model, UserMixin):
             "email": self.email,
             "name": self.name,
         }
-    
+
     @classmethod
     def post_user(cls, data_user):
         new_user = cls(username=data_user["username"], password=bcrypt.hashpw(data_user["password"].encode("utf-8"),bcrypt.gensalt()), email=data_user["email"], name=data_user["name"])
@@ -40,15 +36,17 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return new_user
 
-    def get_user(new_id):
-        user= User.query.filter_by(id=new_id,is_active=True).first()
+    @classmethod
+    def get_user(cls, new_id):
+        user = User.query.filter_by(id=new_id,is_active=True).first()
         if not user:
             return None
         else:
             return user.serialize()
 
-    def update_user(new_id,body):
-        user= User.query.filter_by(id=new_id, is_active=True).first()
+    @classmethod
+    def update_user(cls, new_id, body):
+        user = User.query.filter_by(id=new_id, is_active=True).first()
         if not user:
             return None
         if "username" in body:
@@ -62,8 +60,9 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return user
 
-    def get_user_by_email(new_email, new_password):
-        user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
+    @classmethod
+    def get_user_by_email(cls, new_email, new_password):
+        user = User.query.filter_by(email=new_email, password=new_password, is_active=True).first()
         if not user:
             return None
         return user.serialize()
@@ -92,7 +91,7 @@ class Social(db.Model):
             "photo": self.photo,
             "user_id": self.user_id,
         }
-    
+
     @classmethod
     def post_social(cls, data_social):
         new_social = cls(social_name=data_social["social_name"], username=data_social["username"], email=data_social["email"], password=bcrypt.hashpw(data_social["password"].encode("utf-8"),bcrypt.gensalt()), photo=data_social["photo"])
@@ -101,39 +100,41 @@ class Social(db.Model):
         return new_social
 
 
-    def get_all_socials(new_id):
+    @classmethod
+    def get_all_socials(cls, new_id):
         user = User.get_user(new_id)
         if not user:
             return User.get_user(new_id)
         else:
             socials = Social.query.filter_by(user_id=new_id, is_active=True)
-            socials=list(map(lambda x: x.serialize(), socials))
+            socials = list(map(lambda x: x.serialize(), socials))
             if len(socials) is 0:
                 return None
             else:
                 return socials
 
-
-    def get_social(new_user_id, new_id_social):
+    @classmethod
+    def get_social(cls, new_user_id, new_id_social):
         user = User.get_user(new_user_id)
         if not user:
             return User.get_user(new_user_id)
         else:
             social = Social.query.filter_by(
-                user_id=new_user_id,id=new_id_social,is_active=True
+                user_id=new_user_id, id=new_id_social, is_active=True
             ).first()
             if not social:
                 return None
             else:
                 return social.serialize()
 
-    def update_social(new_user_id, new_id_social):
+    @classmethod
+    def update_social(cls, new_user_id, new_id_social, body):
         user = User.get_user(new_user_id)
         if not user:
             return User.get_user(new_user_id)
         else:
           social = Social.query.filter_by(
-              user_id=new_user_id,id=new_id_social, is_active=True
+              user_id=new_user_id, id=new_id_social, is_active=True
           ).first()
           if not social:
               return None
@@ -156,7 +157,7 @@ class Post(db.Model):
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
     is_active = db.Column(db.Boolean, default=True)
-    
+
     def __repr__(self):
         return f"Post {self.description}"
 
@@ -174,8 +175,9 @@ class Post(db.Model):
         db.session.commit()
         return new_post
 
-    def get_post(new_id_user,new_id_social,new_id_post):
-        social = Social.get_social(new_id_user,new_id_social)
+    @classmethod
+    def get_post(cls, new_id_user,new_id_social,new_id_post):
+        social = Social.get_social(new_id_user, new_id_social)
         user = User.get_user(new_id_user)
         if not user or not social:
             return None
@@ -186,7 +188,8 @@ class Post(db.Model):
             else:
                 return post.serialize()
 
-    def get_all_post(new_id_user,new_id_social):
+    @classmethod
+    def get_all_post(cls, new_id_user,new_id_social):
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
         if not user or not social:
@@ -200,7 +203,8 @@ class Post(db.Model):
                 return posts
             return posts
 
-    def update_post(new_id_user,new_id_social,new_id_post,body):
+    @classmethod
+    def update_post(cls, new_id_user, new_id_social, new_id_post, body):
         social= Social.get_social(new_id_user,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
         if not post or not social:
@@ -227,9 +231,9 @@ class Multimedia(db.Model):
         return {
             "id": self.id,
             "multimedia_type": self.multimedia_type,
-            "multimedia_url": self.multimedia_url      
+            "multimedia_url": self.multimedia_url
         }
-    
+
     @classmethod
     def post_multimedia(cls, data_multimedia):
         new_multimedia = cls(multimedia_type=data_multimedia["multimedia_type"], multimedia_url=data_multimedia["multimedia_url"])
@@ -237,7 +241,8 @@ class Multimedia(db.Model):
         db.session.commit()
         return new_multimedia
 
-    def get_all_multimedia(new_id_user,new_id_social,new_id_post):
+    @classmethod
+    def get_all_multimedia(cls, new_id_user,new_id_social,new_id_post):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
@@ -251,7 +256,8 @@ class Multimedia(db.Model):
             else:
                 return multimedias
 
-    def get_multimedia(new_id_user,new_id_social,new_id_post,new_id_multimedia):
+    @classmethod
+    def get_multimedia(cls, new_id_user,new_id_social,new_id_post,new_id_multimedia):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
