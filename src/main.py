@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for, make_response
+from flask import Flask, request, jsonify, url_for, make_response, redirect, session
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
@@ -13,8 +13,6 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
-from functools import wraps
-from flask_dance.contrib.twitter import make_twitter_blueprint
 import jwt
 import datetime
 import tweepy
@@ -31,6 +29,7 @@ setup_admin(app)
 
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 jwt = JWTManager(app)
+
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -79,14 +78,26 @@ def get_user_by_email():
 
 @app.route('/login/twitter')
 def login_twitter():
-    auth = tweepy.OAuthHandler("esgGNTBknGOAMhAvLavomaJns", "NJJLNbrGD9D34hINeM0UXUMMTIoM27hysMlQlzjZz5NKJE12Jr")
-    auth.set_access_token("1897674564-szBywg2OSk956YdSQXUE8aetAn9Jddnr46RmMhx", "9kNgDpjN6La4qzdybt9KL2jzir1YOVwzSoYKrgwPmZFrS")
-    try:
-        api.verify_credentials()
-        return "Authentication OK"
-    except:
-        return "Error during authentication"
+    auth = tweepy.OAuthHandler("ocTqQ5SsxoOppq2jwkZzHbwk7", "g7Upg2lJ3WEjY3EovbSNTBrdly3HriXK2se0fAFd6pLQxabmUn")
+    # Redirect user to Twitter to authorize 
+    redirect_url = auth.get_authorization_url()
+    session['request_token'] = auth.request_token
+    return redirect(redirect_url)
 
+@app.route('/login/twitter/auth')
+def auth_twitter():
+    request_token = session['request_token']
+    del session['request_token']
+    auth = tweepy.OAuthHandler("ocTqQ5SsxoOppq2jwkZzHbwk7", "g7Upg2lJ3WEjY3EovbSNTBrdly3HriXK2se0fAFd6pLQxabmUn")
+    auth.request_token = request_token
+    verifier = request.args.get('oauth_verifier')
+    auth.get_access_token(verifier)
+    session['token'] = (auth.access_token, auth.access_token_secret)
+    api = tweepy.API(auth)
+
+    return str(api.me())
+     
+    
 
 @app.route('/users/<int:id>', methods=['GET'])
 @jwt_required
