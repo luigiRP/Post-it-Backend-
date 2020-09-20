@@ -23,6 +23,7 @@ passlib = {extras = ["bcrypt"], version = "*"}
 requests = "*"
 flask-login = "*"
 oauthlib = "*"
+instabot = "*"
 
 [requires]
 python_version = "3.7"

@@ -3,8 +3,10 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
+from instabot import Bot
 import enum
 import bcrypt
+import datetime
 
 
 db = SQLAlchemy()
@@ -157,6 +159,7 @@ class Post(db.Model):
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
     is_active = db.Column(db.Boolean, default=True)
+    publication = db.Column(db.Boolean, default= False)
 
     def __repr__(self):
         return f"Post {self.description}"
@@ -205,7 +208,7 @@ class Post(db.Model):
 
     @classmethod
     def update_post(cls, new_id_user, new_id_social, new_id_post, body):
-        social= Social.get_social(new_id_user,new_id_social)
+        social = Social.get_social(new_id_user,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
         if not post or not social:
             return None
@@ -216,6 +219,23 @@ class Post(db.Model):
                 post.description = body["description"]
             db.session.commit()
             return post
+    
+    @classmethod
+    def publication_candidate(cls):
+        actual_date = datetime.datetime.now()
+        news_posts = Post.query.filter_by(date <= actual_date, publication == False)
+    
+    def publish(self):
+        social_post = Social.query.filter_by(id == self.id_social).first()
+        if social_post.social_name == "instagram":
+            instagram_bot = Bot()
+            instagram_bot.login(username=social_post.username, password=social_post.password)
+            multimedia = Multimedia.query.filter_by(id_post==self.id, multimedia_type=="img", is_active==True).first()
+            instagram_bot.upload_photo(multimedia.multimedia_url, caption=self.description)
+            self.publication=True
+            db.sesion.commit()
+
+             
 
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
