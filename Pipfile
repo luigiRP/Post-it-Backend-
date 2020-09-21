@@ -20,6 +20,9 @@ mysqlclient = "*"
 flask-admin = "*"
 sqlalchemy-utils = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
+flask-jwt-extended = "*"
+tweepy = "*"
+flask-dance = {extras = ["sqla"], version = "*"}
 
 [requires]
 python_version = "3.7"
