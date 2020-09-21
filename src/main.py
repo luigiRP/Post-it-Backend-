@@ -31,14 +31,6 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/users/<int:id>', methods=['GET'])
-def get_user(id):
-    user = User.get_user(id)
-    if not user:
-        raise APIException('User not found', status_code=404)
-    return jsonify(user)
-
-
 @app.route('/users/<int:id>', methods=['PUT','PATCH'])
 def update_user(id):
     body=request.get_json()
@@ -46,30 +38,6 @@ def update_user(id):
     if not user:
         raise APIException('User not found', status_code=404)
     return user
-
-@app.route('/login', methods=['GET'])
-def get_user_by_email():
-    body=request.get_json()
-
-    user = User.get_user_by_email(body["email"],body["password"])
-    if not user:
-        raise APIException("Login failed", status_code=401)
-    return jsonify(user)
-
-
-@app.route('/users/<int:id>/socials', methods=['GET'])
-def get_all_socials(id):
-    socials = Social.get_all_socials(id)
-    if not socials:
-        raise APIException('Social media accounts not found', status_code=404)
-    return jsonify(socials)
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['GET'])
-def get_social(id_user,id_social):
-    social = Social.get_social(id_user,id_social)
-    if not social:
-        raise APIException('Social media account not found', status_code=404)
-    return jsonify(social)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['PUT','PATCH'])
 def update_social(id_user,id_social):
@@ -79,21 +47,6 @@ def update_social(id_user,id_social):
         raise APIException('Social media account not found', status_code=404)
     return jsonify(social)
 
-@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
-def get_post(id_user,id_social,id_post):
-    post = Post.get_post(new_id_user,new_id_social,new_id_post)
-    if not post:
-        raise APIException('Post not found', status_code=404)
-    return jsonify(post)
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>/posts', methods=['GET'])
-def get_all_post(id_user,id_social):
-    posts = Post.get_all_post(id_user,id_social)
-    if not posts:
-        raise APIException('Posts not found', status_code=404)
-    return jsonify(posts)
-
-
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['PUT','PATCH'])
 def update_post(id_user,id_social,id_post):
     body=request.get_json()
@@ -102,22 +55,6 @@ def update_post(id_user,id_social,id_post):
         raise APIException('Post not found', status_code=404)
     else:
         return jsonify(post)
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias', methods=['GET'])
-def get_all_multimedia(id_user,id_social,id_post):
-    multimedias = Multimedia.get_all_multimedia(id_user,id_social,id_post)
-    if not multimedias:
-        raise APIException('Multimedia not found', status_code=404)
-    return jsonify(multimedias)
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias/<int:id_multimedia>', methods=['GET'])
-def get_multimedia(id_user,id_social,id_post,id_multimedia):
-    multimedia = Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia)
-    if not multimedia:
-        raise APIException('Multimedia not found', status_code=404)
-    return jsonify(multimedia)
-
-
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
