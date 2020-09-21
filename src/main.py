@@ -62,6 +62,13 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/users/<int:id>', methods=['PUT','PATCH'])
+def update_user(id):
+    body=request.get_json()
+    user = User.get_user(id)
+    if not user:
+        raise APIException('User not found', status_code=404)
+    return user
 
 @app.route('/login', methods=['POST'])
 def get_user_by_email():
@@ -142,8 +149,17 @@ def get_all_socials( id):
 def get_social(id_user,id_social):
     social = Social.get_social(id_user,id_social)
     if not social:
-        raise APIException('Social media account not found', status_code=404) 
+        raise APIException('Social media account not found', status_code=404)
     return jsonify(social)
+
+@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['PUT','PATCH'])
+def update_post(id_user,id_social,id_post):
+    body=request.get_json()
+    post = Post.get_post(id_user,id_social,id_post)
+    if not post:
+        raise APIException('Post not found', status_code=404)
+    else:
+        return jsonify(post)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['PUT','PATCH'])
 @jwt_required
@@ -219,7 +235,6 @@ def delete_multimedia(id_user,id_social,id_post,id_multimedia):
         raise APIException('Multimedia not found', status_code=404)
     else:
         return Multimedia.delete_multimedia(id_user,id_social,id_post,id_multimedia)
-
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

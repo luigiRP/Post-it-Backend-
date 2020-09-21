@@ -21,7 +21,7 @@ class User(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "username": self.username, 
+            "username": self.username,
             "email": self.email,
             "name": self.name
         }
@@ -43,7 +43,6 @@ class User(db.Model):
             return "User deleted"
     
     def update_user(new_id,body):
-     
         user= User.query.filter_by(id=new_id, is_active=True).first() 
         if user is None:
             return None
@@ -63,7 +62,17 @@ class User(db.Model):
         user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
         if not user:
             return None
-        return user.serialize()
+        if "username" in body:
+            user.username = body["username"]
+        if "email" in body:
+            user.email = body["email"]
+        if "name" in body:
+            user.name = body["name"]
+        if "password" in body:
+            user.password = body["password"]
+        db.session.commit()
+        return user
+
 
 
 class SocialEnum(enum.Enum):
@@ -82,7 +91,6 @@ class Social(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     is_active = db.Column(db.Boolean, default=True)
     posts = relationship('Post',backref="social", lazy=True)
-    
 
     def __repr__(self):
         return f"Social {self.username}"
@@ -91,37 +99,13 @@ class Social(db.Model):
         return {
             "id": self.id,
             "social_name": self.social_name,
-            "username": self.username, 
+            "username": self.username,
             "email": self.email,
             "photo": self.photo,
             "user_id": self.user_id,
             "is_active": self.is_active
         }
 
-    
-    def get_all_socials(new_id):
-        user = User.get_user(new_id)
-        if not user:
-            return User.get_user(new_id)
-        else:
-            socials = Social.query.filter_by(user_id=new_id, is_active=True)
-            socials=list(map(lambda x: x.serialize(), socials))
-            if len(socials) is 0:
-                return None
-            else:
-                return socials
-        
-    
-    def get_social(new_user_id, new_id_social):
-        user = User.get_user(new_user_id)
-        if not user:
-            return User.get_user(new_user_id)
-        else:
-            social = Social.query.filter_by(user_id=new_user_id,id=new_id_social,is_active=True).first()
-            if not social:
-                return None
-            else:
-                return social.serialize()
     
     def update_social(new_user_id, new_id_social):
         user = User.get_user(new_user_id)
@@ -141,18 +125,18 @@ class Social(db.Model):
               if "password" in body:
                   social.password = body["password"]
               db.session.commit()
-              return "social media account with id: " + str(social.id) + " updated"
-    
+              return social
+            
     def delete_social(new_user_id,new_id_social):
         user = User.get_user(new_user_id)
         social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
-        
         if user is None or social is None:
             return None
         else:
             social.is_active = False
             db.session.commit()
             return "Social media account deleted"
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -161,7 +145,7 @@ class Post(db.Model):
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
     is_active = db.Column(db.Boolean, default=True)
-        
+
     def __repr__(self):
         return f"Post {self.description}"
 
@@ -172,23 +156,10 @@ class Post(db.Model):
             "id_social": self.id_social
         }
 
-    
-    def get_post(new_id_user,new_id_social,new_id_post):
-        social = Social.get_social(new_id_user,new_id_social)
-        user = User.get_user(new_id_user)
-        if not user or not social:
-            return None
-        else:
-            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post,is_active=True).first()
-            if not post:
-                return None
-            else:
-                return post.serialize()
-    
-    def get_all_post(new_id_user,new_id_social):
-        social = Social.get_social(new_id_user,new_id_social)
-        user = User.get_user(new_id_user)
-        if not user or not social:
+    def update_post(new_id_user,new_id_social,new_id_post,body):
+        social= Social.get_social(new_id_user,new_id_social)
+        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
+        if not post or not social:
             return None
         else:
             posts = Post.query.filter_by(id_social=new_id_social, is_active=True)
@@ -210,7 +181,7 @@ class Post(db.Model):
             if "description" in body:
                 post.description = body["description"]
             db.session.commit()
-            return "post account with id: " + str(post.id) + " updated"
+            return post
     
     def delete_post(new_user_id,new_id_social,new_id_post):
         user = User.get_user(new_user_id)
@@ -223,7 +194,7 @@ class Post(db.Model):
             post.is_active = False
             db.session.commit()
             return "Post deleted"
-    
+
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
     multimedia_type = db.Column(db.Enum("img","video"), nullable=False)
@@ -238,7 +209,7 @@ class Multimedia(db.Model):
         return {
             "id": self.id,
             "multimedia_type": self.multimedia_type,
-            "multimedia_url": self.multimedia_url      
+            "multimedia_url": self.multimedia_url
         }
 
     def get_all_multimedia(new_id_user,new_id_social,new_id_post):
@@ -280,4 +251,5 @@ class Multimedia(db.Model):
             multimedia.is_active = False
             db.session.commit()
             return "Multimedia deleted"
+
 
