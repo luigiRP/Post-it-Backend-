@@ -33,19 +33,19 @@ def sitemap():
 
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
-    if User.get_user(id) is None:
+    user = User.get_user(id)
+    if not user:
         raise APIException('User not found', status_code=404)
-    else:
-        return User.get_user(id)
+    return jsonify(user)
 
 
 @app.route('/users/<int:id>', methods=['PUT','PATCH'])
 def update_user(id):
     body=request.get_json()
-    if User.update_user(id, body) is None:
+    user = User.get_user(id)
+    if not user:
         raise APIException('User not found', status_code=404)
-    else:
-        return User.update_user(id,body)
+    return user
 
 @app.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
@@ -57,35 +57,34 @@ def delete_user(id):
 @app.route('/login', methods=['GET'])
 def get_user_by_email():
     body=request.get_json()
-    if User.get_user_by_email(body["email"],body["password"]) is "email":
-        raise APIException("email doesn't exist", status_code=404)
-    elif User.get_user_by_email(body["email"],body["password"]) is "password":
-        raise APIException("password for that email doesn't exist", status_code=404)
-    else:
-        return User.get_user_by_email(body["email"],body["password"])
+
+    user = User.get_user_by_email(body["email"],body["password"])
+    if not user:
+        raise APIException("Login failed", status_code=401)
+    return jsonify(user)
 
 
 @app.route('/users/<int:id>/socials', methods=['GET'])
 def get_all_socials(id):
-    if Social.get_all_socials(id) is None:
+    socials = Social.get_all_socials(id)
+    if not socials:
         raise APIException('Social media accounts not found', status_code=404)
-    else:
-        return jsonify(Social.get_all_socials(id))
+    return jsonify(socials)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['GET'])
 def get_social(id_user,id_social):
-    if Social.get_social(id_user,id_social) is None:
-        raise APIException('Social media account not found', status_code=404) 
-    else:
-        return jsonify(Social.get_social(id_user,id_social))
+    social = Social.get_social(id_user,id_social)
+    if not social:
+        raise APIException('Social media account not found', status_code=404)
+    return jsonify(social)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['PUT','PATCH'])
 def update_social(id_user,id_social):
     body=request.get_json()
-    if Social.update_social(id_user,id_social,body) is None:
-        raise APIException('Social media account not found', status_code=404) 
-    else:
-        return jsonify(Social.update_social(id_user,id_social,body))
+    social = Social.get_social(id_user,id_social)
+    if not social:
+        raise APIException('Social media account not found', status_code=404)
+    return jsonify(social)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['DELETE'])
 def delete_social(id_user,id_social):
@@ -96,26 +95,27 @@ def delete_social(id_user,id_social):
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
 def get_post(id_user,id_social,id_post):
-    if Post.get_post(id_user,id_social,id_post) is None:
-        raise APIException('Post not found', status_code=404) 
-    else:
-        return jsonify(Post.get_post(id_user,id_social,id_post))
+    post = Post.get_post(new_id_user,new_id_social,new_id_post)
+    if not post:
+        raise APIException('Post not found', status_code=404)
+    return jsonify(post)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts', methods=['GET'])
 def get_all_post(id_user,id_social):
-    if Post.get_all_post(id_user,id_social) is None:
+    posts = Post.get_all_post(id_user,id_social)
+    if not posts:
         raise APIException('Posts not found', status_code=404)
-    else: 
-        return jsonify(Post.get_all_post(id_user,id_social))
+    return jsonify(posts)
 
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['PUT','PATCH'])
 def update_post(id_user,id_social,id_post):
     body=request.get_json()
-    if Post.update_post(id_user,id_social,id_post,body) is None:
-        raise APIException('Post not found', status_code=404) 
+    post = Post.get_post(id_user,id_social,id_post)
+    if not post:
+        raise APIException('Post not found', status_code=404)
     else:
-        return jsonify(Post.update_post(id_user,id_social,id_post,body))
+        return jsonify(post)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['DELETE'])
 def delete_post(id_user,id_social,id_post):
@@ -126,17 +126,17 @@ def delete_post(id_user,id_social,id_post):
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias', methods=['GET'])
 def get_all_multimedia(id_user,id_social,id_post):
-    if Multimedia.get_all_multimedia(id_user,id_social,id_post) is None:
+    multimedias = Multimedia.get_all_multimedia(id_user,id_social,id_post)
+    if not multimedias:
         raise APIException('Multimedia not found', status_code=404)
-    else: 
-        return jsonify(Multimedia.get_all_multimedia(id_user,id_social,id_post))
+    return jsonify(multimedias)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias/<int:id_multimedia>', methods=['GET'])
 def get_multimedia(id_user,id_social,id_post,id_multimedia):
-    if Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia) is None:
+    multimedia = Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia)
+    if not multimedia:
         raise APIException('Multimedia not found', status_code=404)
-    else: 
-        return jsonify(Multimedia.get_multimedia(id_user,id_social,id_post,id_multimedia))
+    return jsonify(multimedia)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>/multimedias/<int:id_multimedia>', methods=['DELETE'])
 def delete_multimedia(id_user,id_social,id_post,id_multimedia):
