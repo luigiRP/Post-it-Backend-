@@ -26,6 +26,12 @@ class User(db.Model):
             "name": self.name
         }
 
+    
+    def delete_user(new_id):
+        user = User.query.filter_by(id=new_id, is_active=True).first() 
+        if not user:
+            return None
+
     def get_user(new_id):
         user= User.query.filter_by(id=new_id,is_active=True).first()        
         if not user:
@@ -73,8 +79,6 @@ class User(db.Model):
         db.session.commit()
         return user
 
-
-
 class SocialEnum(enum.Enum):
     instagram = 'Instagram'
     facebook = 'Facebook'
@@ -88,7 +92,7 @@ class Social(db.Model):
     email = db.Column(db.String(320), nullable=False, unique=False)
     social_name = db.Column(db.Enum("instagram","twitter","facebook","linkedin"), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) 
     is_active = db.Column(db.Boolean, default=True)
     posts = relationship('Post',backref="social", lazy=True)
 
@@ -105,7 +109,17 @@ class Social(db.Model):
             "user_id": self.user_id,
             "is_active": self.is_active
         }
-
+    
+    def delete_social(new_user_id,new_id_social):
+        user = User.get_user(new_user_id)
+        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
+        
+        if not user or not social:
+            return None
+        else:
+            social.is_active = False
+            db.session.commit()
+            return social
     
     def update_social(new_user_id, new_id_social):
         user = User.get_user(new_user_id)
@@ -137,7 +151,6 @@ class Social(db.Model):
             db.session.commit()
             return "Social media account deleted"
 
-
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     date = db.Column(db.Date, nullable=False, unique=False)
@@ -156,6 +169,8 @@ class Post(db.Model):
             "id_social": self.id_social
         }
 
+    
+
     def update_post(new_id_user,new_id_social,new_id_post,body):
         social= Social.get_social(new_id_user,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
@@ -169,19 +184,6 @@ class Post(db.Model):
             else:
                 return posts
             
-    
-    def update_post(new_id_user,new_id_social,new_id_post,body):
-        social= Social.get_social(new_id_user,new_id_social)
-        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
-        if post is None or social is None:
-            return None
-        else:
-            if "date" in body:
-                post.date = body["date"]
-            if "description" in body:
-                post.description = body["description"]
-            db.session.commit()
-            return post
     
     def delete_post(new_user_id,new_id_social,new_id_post):
         user = User.get_user(new_user_id)
@@ -212,6 +214,19 @@ class Multimedia(db.Model):
             "multimedia_url": self.multimedia_url
         }
 
+    
+    def delete_multimedia(new_user_id,new_id_social,new_id_post,new_id_multimedia):
+        user = User.get_user(new_user_id)
+        social = Social.get_social(new_user_id,new_id_social)
+        post = Post.get_post(new_user_id,new_id_social,new_id_post)
+        multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()      
+        if not user or not social or not post or not multimedia:
+            return None
+        else:
+            multimedia.is_active = False
+            db.session.commit()
+            return multimedia.serialize()
+          
     def get_all_multimedia(new_id_user,new_id_social,new_id_post):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
@@ -251,5 +266,3 @@ class Multimedia(db.Model):
             multimedia.is_active = False
             db.session.commit()
             return "Multimedia deleted"
-
-
