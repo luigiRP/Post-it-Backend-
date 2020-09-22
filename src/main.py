@@ -62,14 +62,6 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/users/<int:id>', methods=['PUT','PATCH'])
-def update_user(id):
-    body=request.get_json()
-    user = User.get_user(id)
-    if not user:
-        raise APIException('User not found', status_code=404)
-    return user
-
 @app.route('/login', methods=['POST'])
 def get_user_by_email():
     body=request.get_json()
@@ -136,13 +128,6 @@ def delete_user(id):
     else:
         return User.delete_user(id)
 
-@app.route('/users/<int:id>/socials', methods=['GET'])
-@jwt_required
-def get_all_socials( id):
-    if Social.get_all_socials(id) is None:
-        raise APIException('Social media accounts not found', status_code=404)
-    else:
-        return jsonify(Social.get_all_socials(id))
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['GET'])
 @jwt_required
@@ -194,15 +179,6 @@ def get_all_post(id_user,id_social):
         raise APIException('Posts not found', status_code=404)
     return jsonify(posts)
 
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['PUT','PATCH'])
-@jwt_required
-def update_post(id_user,id_social,id_post):
-    body=request.get_json()
-    if Post.update_post(id_user,id_social,id_post,body) is None:
-        raise APIException('Post not found', status_code=404) 
-    else:
-        return jsonify(Post.update_post(id_user,id_social,id_post,body))
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['DELETE'])
 @jwt_required
