@@ -72,7 +72,7 @@ db.session.commit()
  ```py
  user1 = Person.query.get(person_id)
 if user1 is None:
-    raise APIException('User not found', status_code=404)
+    raise APIException('User not f0ound', status_code=404)
 db.session.delete(user1)
 db.session.commit()
  ```
