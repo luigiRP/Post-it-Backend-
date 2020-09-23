@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5c21bf9ec2a9
+Revision ID: dd763b5d1d40
 Revises: 
-Create Date: 2020-09-22 19:21:44.041686
+Create Date: 2020-09-23 10:10:45.909880
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5c21bf9ec2a9'
+revision = 'dd763b5d1d40'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=40), nullable=False),
-    sa.Column('password', sa.String(length=250), nullable=False),
+    sa.Column('password', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=320), nullable=False),
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=True),
@@ -32,9 +32,9 @@ def upgrade():
     op.create_table('social',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
-    sa.Column('password', sa.String(length=250), nullable=False),
+    sa.Column('password', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=320), nullable=False),
-    sa.Column('social_name', sa.Enum('instagram', 'twitter', 'facebook', 'linkedin'), nullable=False),
+    sa.Column('social_name', sa.Enum('instagram', 'facebook', 'twitter', 'linkedin', name='socialenum'), nullable=False),
     sa.Column('photo', sa.Text(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),

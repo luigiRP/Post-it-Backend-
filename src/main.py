@@ -188,7 +188,7 @@ def delete_social(id_user,id_social):
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['GET'])
 @jwt_required
 def get_post(id_user,id_social,id_post):
-    post = Post.get_post(new_id_user,new_id_social,new_id_post)
+    post = Post.get_post(id_user,id_social,id_post)
     if not post:
         raise APIException('Post not found', status_code=404) 
     return jsonify(post)
@@ -200,15 +200,6 @@ def get_all_post(id_user,id_social):
     if not posts:
         raise APIException('Posts not found', status_code=404)
     return jsonify(posts)
-
-
-@app.route('/users/<int:id_user>/socials/<int:id_social>', methods=['DELETE'])
-@jwt_required
-def delete_social(id_user,id_social):
-    if Social.get_social(id_user,id_social) is None:
-        raise APIException('Social not found', status_code=404)
-    else:
-        return Social.delete_social(id_user,id_social)
 
 @app.route('/users/<int:id_user>/socials/<int:id_social>/posts/<int:id_post>', methods=['DELETE'])
 @jwt_required

@@ -33,19 +33,19 @@ class User(db.Model):
         db.session.commit()
         return new_user
 
-    def delete_user(new_id):
+    def delete_user(self,new_id):
         user = User.query.filter_by(id=new_id, is_active=True).first() 
         if not user:
             return None
 
-    def get_user(new_id):
+    def get_user(self,new_id):
         user= User.query.filter_by(id=new_id,is_active=True).first()        
         if not user:
             return None
         else:       
             return user.serialize()
     
-    def delete_user(new_id):
+    def delete_user(self,new_id):
         user = User.query.filter_by(id=new_id, is_active=True).first() 
         if user is None:
             return None
@@ -54,7 +54,7 @@ class User(db.Model):
             db.session.commit()
             return "User deleted"
     
-    def update_user(new_id,body):
+    def update_user(self,new_id,body):
         user= User.query.filter_by(id=new_id, is_active=True).first() 
         if user is None:
             return None
@@ -70,7 +70,7 @@ class User(db.Model):
             db.session.commit()
             return "user with id: " + str(user.id) + " updated"
         
-    def get_user_by_email(new_email, new_password):
+    def get_user_by_email(self,new_email, new_password,body):
         user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
         if not user:
             return None
@@ -124,7 +124,7 @@ class Social(db.Model):
         db.session.commit()
         return new_social
       
-    def delete_social(new_user_id,new_id_social):
+    def delete_social(self,new_user_id,new_id_social):
         user = User.get_user(new_user_id)
         social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
         
@@ -135,7 +135,7 @@ class Social(db.Model):
             db.session.commit()
             return social
     
-    def update_social(new_user_id, new_id_social):
+    def update_social(self,new_user_id, new_id_social,body):
         user = User.get_user(new_user_id)
         if user is None:
             return User.get_user(new_user_id)
@@ -155,7 +155,7 @@ class Social(db.Model):
               db.session.commit()
               return social
             
-    def delete_social(new_user_id,new_id_social):
+    def delete_social(self,new_user_id,new_id_social):
         user = User.get_user(new_user_id)
         social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
         if user is None or social is None:
@@ -191,7 +191,7 @@ class Post(db.Model):
         return new_post
 
 
-    def update_post(new_id_user,new_id_social,new_id_post,body):
+    def update_post(self,new_id_user,new_id_social,new_id_post,body):
         social= Social.get_social(new_id_user,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
         if not post or not social:
@@ -199,13 +199,13 @@ class Post(db.Model):
         else:
             posts = Post.query.filter_by(id_social=new_id_social, is_active=True)
             posts = list(map(lambda x: x.serialize(), posts))
-            if len(posts) is 0:
+            if len(posts) == 0:
                 return None
             else:
                 return posts
             
     
-    def delete_post(new_user_id,new_id_social,new_id_post):
+    def delete_post(self,new_user_id,new_id_social,new_id_post):
         user = User.get_user(new_user_id)
         social = Social.get_social(new_user_id,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
@@ -241,7 +241,7 @@ class Multimedia(db.Model):
         db.session.commit()
         return new_multimedia
     
-    def delete_multimedia(new_user_id,new_id_social,new_id_post,new_id_multimedia):
+    def delete_multimedia(self,new_user_id,new_id_social,new_id_post,new_id_multimedia):
         user = User.get_user(new_user_id)
         social = Social.get_social(new_user_id,new_id_social)
         post = Post.get_post(new_user_id,new_id_social,new_id_post)
@@ -253,7 +253,7 @@ class Multimedia(db.Model):
             db.session.commit()
             return multimedia.serialize()
           
-    def get_all_multimedia(new_id_user,new_id_social,new_id_post):
+    def get_all_multimedia(self,new_id_user,new_id_social,new_id_post):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
@@ -262,12 +262,12 @@ class Multimedia(db.Model):
         else:
             multimedias = Multimedia.query.filter_by(id_post=new_id_post,is_active=True)
             multimedias = list(map(lambda x: x.serialize(), multimedias))
-            if len(multimedias) is 0:
+            if len(multimedias) == 0:
                 return None
             else:
                 return multimedias
     
-    def get_multimedia(new_id_user,new_id_social,new_id_post,new_id_multimedia):
+    def get_multimedia(self,new_id_user,new_id_social,new_id_post,new_id_multimedia):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
         user = User.get_user(new_id_user)
@@ -280,7 +280,7 @@ class Multimedia(db.Model):
             else:
                 return multimedia.serialize()
     
-    def delete_multimedia(new_user_id,new_id_social,new_id_post,new_id_multimedia):
+    def delete_multimedia(self,new_user_id,new_id_social,new_id_post,new_id_multimedia):
         user = User.get_user(new_user_id)
         social = Social.get_social(new_user_id,new_id_social)
         post = Post.get_post(new_user_id,new_id_social,new_id_post)
