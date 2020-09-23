@@ -9,15 +9,11 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(40), nullable=False, unique=True)
-    password = db.Column(db.String(250), unique=False, nullable=False)
+    password = db.Column(db.String(80), unique=False, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
     name = db.Column(db.String(120), unique=False, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     social = db.relationship('Social', backref='user', lazy=True)
-    email = db.Column(db.String(320), unique=True, nullable=False)
-    name = db.Column(db.String(120), unique=False, nullable=False)
-    social = db.relationship('Social', backref='user', lazy=True)
-    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"User {self.username}"
@@ -30,16 +26,52 @@ class User(db.Model):
             "name": self.name
         }
 
+    @classmethod
+    def post_user(cls, data_user):
+        new_user = cls(username=data_user["username"], password=data_user["password"], email=data_user["email"], name=data_user["name"])
+        db.session.add(new_user)
+        db.session.commit()
+        return new_user
 
-    def get_user(new_id):
-        user= User.query.filter_by(id=new_id,is_active=True).first()
+    def delete_user(new_id):
+        user = User.query.filter_by(id=new_id, is_active=True).first() 
         if not user:
             return None
-        else:
-            return user.serialize()
 
+    def get_user(new_id):
+        user= User.query.filter_by(id=new_id,is_active=True).first()        
+        if not user:
+            return None
+        else:       
+            return user.serialize()
+    
+    def delete_user(new_id):
+        user = User.query.filter_by(id=new_id, is_active=True).first() 
+        if user is None:
+            return None
+        else:
+            user.is_active = False
+            db.session.commit()
+            return "User deleted"
+    
     def update_user(new_id,body):
-        user= User.query.filter_by(id=new_id, is_active=True).first()
+        user= User.query.filter_by(id=new_id, is_active=True).first() 
+        if user is None:
+            return None
+        else:
+            if "username" in body:
+                user.username = body["username"]
+            if "email" in body:
+                user.email = body["email"]
+            if "name" in body:
+                user.name = body["name"]
+            if "password" in body:
+                user.password = body["password"]
+            db.session.commit()
+            return "user with id: " + str(user.id) + " updated"
+        
+    def get_user_by_email(new_email, new_password):
+        user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
         if not user:
             return None
         if "username" in body:
@@ -53,13 +85,6 @@ class User(db.Model):
         db.session.commit()
         return user
 
-    def get_user_by_email(new_email, new_password):
-        user = User.query.filter_by(email = new_email, password=new_password, is_active=True).first()
-        if not user:
-            return None
-        return user.serialize()
-
-
 class SocialEnum(enum.Enum):
     instagram = 'Instagram'
     facebook = 'Facebook'
@@ -69,14 +94,13 @@ class SocialEnum(enum.Enum):
 class Social(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False, unique=False)
-    password = db.Column(db.String(250), unique=False, nullable=False)
+    password = db.Column(db.String(80), nullable=False, unique=False)
     email = db.Column(db.String(320), nullable=False, unique=False)
-    social_name = db.Column(db.Enum("instagram","twitter","facebook","linkedin"), nullable=False, unique=False)
+    social_name = db.Column(db.Enum(SocialEnum), nullable=False, unique=False)
     photo = db.Column(db.Text, nullable=True, unique=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     is_active = db.Column(db.Boolean, default=True)
     posts = relationship('Post',backref="social", lazy=True)
-    is_active = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f"Social {self.username}"
@@ -89,44 +113,35 @@ class Social(db.Model):
             "email": self.email,
             "photo": self.photo,
             "user_id": self.user_id,
+            "is_active": self.is_active
         }
+    
 
-
-    def get_all_socials(new_id):
-        user = User.get_user(new_id)
-        if not user:
-            return User.get_user(new_id)
-        else:
-            socials = Social.query.filter_by(user_id=new_id, is_active=True)
-            socials=list(map(lambda x: x.serialize(), socials))
-            if len(socials) is 0:
-                return None
-            else:
-                return socials
-
-
-    def get_social(new_user_id, new_id_social):
+    @classmethod
+    def post_social(cls, data_social):
+        new_social = cls(social_name=data_social["social_name"], username=data_social["username"], email=data_social["email"], password=data_social["password"], photo=data_social["photo"])
+        db.session.add(new_social)
+        db.session.commit()
+        return new_social
+      
+    def delete_social(new_user_id,new_id_social):
         user = User.get_user(new_user_id)
-        if not user:
-            return User.get_user(new_user_id)
+        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
+        
+        if not user or not social:
+            return None
         else:
-            social = Social.query.filter_by(
-                user_id=new_user_id,id=new_id_social,is_active=True
-            ).first()
-            if not social:
-                return None
-            else:
-                return social.serialize()
-
+            social.is_active = False
+            db.session.commit()
+            return social
+    
     def update_social(new_user_id, new_id_social):
         user = User.get_user(new_user_id)
-        if not user:
+        if user is None:
             return User.get_user(new_user_id)
         else:
-          social = Social.query.filter_by(
-              user_id=new_user_id,id=new_id_social, is_active=True
-          ).first()
-          if not social:
+          social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
+          if social is None:
               return None
           else:
               if "social_name" in body:
@@ -139,6 +154,16 @@ class Social(db.Model):
                   social.password = body["password"]
               db.session.commit()
               return social
+            
+    def delete_social(new_user_id,new_id_social):
+        user = User.get_user(new_user_id)
+        social = Social.query.filter_by(user_id=new_user_id,id=new_id_social, is_active=True).first()
+        if user is None or social is None:
+            return None
+        else:
+            social.is_active = False
+            db.session.commit()
+            return "Social media account deleted"
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -147,7 +172,7 @@ class Post(db.Model):
     multimedias = db.relationship('Multimedia', backref='post', lazy=True)
     id_social = db.Column(db.Integer, db.ForeignKey('social.id'))
     is_active = db.Column(db.Boolean, default=True)
-
+    
     def __repr__(self):
         return f"Post {self.description}"
 
@@ -158,23 +183,18 @@ class Post(db.Model):
             "id_social": self.id_social
         }
 
+    @classmethod
+    def post_posts(cls, posting):
+        new_post = cls(date = posting["date"], description = posting["description"])
+        db.session.add(new_post)
+        db.session.commit()
+        return new_post
 
-    def get_post(new_id_user,new_id_social,new_id_post):
-        social = Social.get_social(new_id_user,new_id_social)
-        user = User.get_user(new_id_user)
-        if not user or not social:
-            return None
-        else:
-            post = Post.query.filter_by(id_social=new_id_social,id=new_id_post,is_active=True).first()
-            if not post:
-                return None
-            else:
-                return post.serialize()
 
-    def get_all_post(new_id_user,new_id_social):
-        social = Social.get_social(new_id_user,new_id_social)
-        user = User.get_user(new_id_user)
-        if not user or not social:
+    def update_post(new_id_user,new_id_social,new_id_post,body):
+        social= Social.get_social(new_id_user,new_id_social)
+        post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
+        if not post or not social:
             return None
         else:
             posts = Post.query.filter_by(id_social=new_id_social, is_active=True)
@@ -183,20 +203,19 @@ class Post(db.Model):
                 return None
             else:
                 return posts
-            return posts
-
-    def update_post(new_id_user,new_id_social,new_id_post,body):
-        social= Social.get_social(new_id_user,new_id_social)
+            
+    
+    def delete_post(new_user_id,new_id_social,new_id_post):
+        user = User.get_user(new_user_id)
+        social = Social.get_social(new_user_id,new_id_social)
         post = Post.query.filter_by(id_social=new_id_social,id=new_id_post, is_active=True).first()
-        if not post or not social:
+        
+        if user is None or social is None or post is None:
             return None
         else:
-            if "date" in body:
-                post.date = body["date"]
-            if "description" in body:
-                post.description = body["description"]
+            post.is_active = False
             db.session.commit()
-            return post
+            return "Post deleted"
 
 class Multimedia(db.Model):
     id = db.Column(db.Integer,nullable=False, primary_key=True)
@@ -212,9 +231,28 @@ class Multimedia(db.Model):
         return {
             "id": self.id,
             "multimedia_type": self.multimedia_type,
-            "multimedia_url": self.multimedia_url
+            "multimedia_url": self.multimedia_url      
         }
-
+    
+    @classmethod
+    def post_multimedia(cls, data_multimedia):
+        new_multimedia = cls(multimedia_type=data_multimedia["multimedia_type"], multimedia_url=data_multimedia["multimedia_url"])
+        db.session.add(new_multimedia)
+        db.session.commit()
+        return new_multimedia
+    
+    def delete_multimedia(new_user_id,new_id_social,new_id_post,new_id_multimedia):
+        user = User.get_user(new_user_id)
+        social = Social.get_social(new_user_id,new_id_social)
+        post = Post.get_post(new_user_id,new_id_social,new_id_post)
+        multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()      
+        if not user or not social or not post or not multimedia:
+            return None
+        else:
+            multimedia.is_active = False
+            db.session.commit()
+            return multimedia.serialize()
+          
     def get_all_multimedia(new_id_user,new_id_social,new_id_post):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
@@ -222,13 +260,13 @@ class Multimedia(db.Model):
         if not user or not social or not post:
             return None
         else:
-            multimedias = Multimedia.query.filter_by(id_post=new_id_post, is_active=True)
+            multimedias = Multimedia.query.filter_by(id_post=new_id_post,is_active=True)
             multimedias = list(map(lambda x: x.serialize(), multimedias))
             if len(multimedias) is 0:
                 return None
             else:
                 return multimedias
-
+    
     def get_multimedia(new_id_user,new_id_social,new_id_post,new_id_multimedia):
         post = Post.get_post(new_id_user,new_id_social,new_id_post)
         social = Social.get_social(new_id_user,new_id_social)
@@ -236,9 +274,22 @@ class Multimedia(db.Model):
         if not user or not social or not post:
             return None
         else:
-            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()
+            multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia,is_active=True).first()
             if not multimedia:
                 return None
             else:
                 return multimedia.serialize()
+    
+    def delete_multimedia(new_user_id,new_id_social,new_id_post,new_id_multimedia):
+        user = User.get_user(new_user_id)
+        social = Social.get_social(new_user_id,new_id_social)
+        post = Post.get_post(new_user_id,new_id_social,new_id_post)
+        multimedia = Multimedia.query.filter_by(id_post=new_id_post, id=new_id_multimedia, is_active=True).first()
+        
+        if user is None or social is None or post is None or multimedia is None:
+            return None
+        else:
+            multimedia.is_active = False
+            db.session.commit()
+            return "Multimedia deleted"
 
